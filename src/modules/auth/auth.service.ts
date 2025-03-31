@@ -36,24 +36,24 @@ export class AuthService {
 	];
 	async authenticate(authenticateDto: AuthenticateDto) {
 		const { email, password } = authenticateDto;
-		const user = await this.userRepo.findByEmail({
+		const _user = await this.userRepo.findUnique({
 			where: { email },
 		});
 
-		if (!user) {
+		if (!_user) {
 			throw new UnauthorizedException('Invalid credentials');
 		}
 
 		const isPasswordValid = await this.passwordHelper.compare(
 			password,
-			user.password,
+			_user.password,
 		);
 
 		if (!isPasswordValid) {
 			throw new UnauthorizedException('Invalid credentials');
 		}
 
-		const accessToken = await this.jwtService.signAsync({ userId: user.id });
+		const accessToken = await this.generateAccessToken(_user.id);
 
 		return { accessToken };
 	}
@@ -61,7 +61,7 @@ export class AuthService {
 	async signup(signupDto: SignupDto) {
 		const { email, name, password } = signupDto;
 
-		const emailTaken = await this.userRepo.findByEmail({
+		const emailTaken = await this.userRepo.findUnique({
 			where: { email },
 			select: { id: true },
 		});
@@ -85,6 +85,12 @@ export class AuthService {
 			},
 		});
 
-		return _user;
+		const accessToken = await this.generateAccessToken(_user.id);
+
+		return { accessToken };
+	}
+
+	private async generateAccessToken(userId: string) {
+		return await this.jwtService.signAsync({ userId });
 	}
 }
