@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CategorieRepositories } from 'src/database/repositories/categories.repositories';
+import { CategoriesRepositories } from 'src/database/repositories/categories.repositories';
 
 @Injectable()
 export class CategoriesService {
-	constructor(private readonly categoriesRepo: CategorieRepositories) {}
+	constructor(private readonly categoriesRepo: CategoriesRepositories) {}
 
 	findAllByUserId(userId: string) {
 		return this.categoriesRepo.findMany({ where: { userId } });
